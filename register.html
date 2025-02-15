@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            overflow: hidden;
+        }
+
+        .register-container { 
+            background: rgba(255, 255, 255, 0.2); 
+            backdrop-filter: blur(10px); 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            width: 350px; 
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .register-container:hover {
+            transform: scale(1.05) translateY(-10px);
+            box-shadow: 10px 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            color: #fff;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+        }
+
+        input { 
+            display: block; 
+            margin: 15px auto; 
+            padding: 10px; 
+            width: 90%; 
+            border: none; 
+            border-radius: 5px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .password-container { 
+            position: relative; 
+            width: 90%; 
+            margin: 0 auto;
+        }
+
+        .toggle-password { 
+            position: absolute; 
+            right: 10px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            cursor: pointer;
+            color: #000;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: #ff9800;
+        }
+
+        button {
+            padding: 10px; 
+            width: 100%; 
+            border: none; 
+            border-radius: 5px; 
+            background: #ff9800; 
+            color: white; 
+            font-size: 16px; 
+            cursor: pointer;
+            transition: all 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: blueviolet;
+            transform: scale(1.05);
+            box-shadow: 0px 5px 15px rgba(255, 152, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="email" id="email" placeholder="Email">
+        <div class="password-container">
+            <input type="password" id="password" placeholder="Password">
+            <span class="toggle-password" onclick="togglePassword()">👁</span>
+        </div>
+        <button onclick="registerUser()">Register</button>
+        <div class="login-option">
+            <a href="index.html">Already have an account? Login</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById("password");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+            } else {
+                passwordField.type = "password";
+            }
+        }
+
+        function registerUser() {
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            
+            if (username && email && password) {
+                alert("Registration successful! You can now login.");
+                window.location.href = "index.html";
+            } else {
+                alert("Please fill all fields.");
+            }
+        }
+    </script>
+</body>
+</html>

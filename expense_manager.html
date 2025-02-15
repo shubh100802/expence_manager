@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 0px;
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            font-size: 24px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .logout-btn {
+            background: linear-gradient(45deg, #ff512f, #dd2476);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            position: absolute;
+            right: 20px;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(45deg, #dd2476, #ff512f);
+            transform: scale(1.1);
+        }
+
+        .export-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .export-btn {
+            padding: 10px 18px;
+            background: #ffa502;
+            color: white;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .export-btn:hover {
+            background: #e67e00;
+            transform: scale(1.05);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3);
+            margin-top: 25px;
+            margin-bottom: 100px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input,
+        button {
+            padding: 14px;
+            margin-top: 6px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button {
+            background: #ff6f61;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #e65850;
+            transform: scale(1.05);
+        }
+
+        .expense-list {
+            margin-top: 20px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .delete-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .footer {
+
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.3)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <span>Expense Manager</span>
+
+    </div>
+    <div>
+        <button class="logout-btn" onclick="logout()">Log Out</button>
+    </div>
+
+    <div class="export-buttons">
+        <button class="export-btn" onclick="generatePDF()">Export to PDF</button>
+        <button class="export-btn" onclick="exportToWord()">Export to Word</button>
+        <button class="export-btn" onclick="exportToExcel()">Export to Excel</button>
+    </div>
+
+    <div class="container">
+        <h2>Add Expense</h2>
+        <div class="input-group">
+            <input type="text" id="expense-name" placeholder="Expense Name">
+        </div>
+        <div class="input-group">
+            <input type="number" id="expense-amount" placeholder="Amount">
+        </div>
+        <button onclick="addExpense()">Add Expense</button>
+
+        <h2>Your Expenses</h2>
+        <div class="total-expense" id="total-expense">Total: ₹0</div>
+        <div class="expense-list" id="expense-list"></div>
+        
+    </div>
+
+    <div class="footer">© 2025 Expense Manager. All Rights Reserved.</div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        let total = 0;
+
+        function addExpense() {
+            const name = document.getElementById("expense-name").value;
+            const amount = parseFloat(document.getElementById("expense-amount").value);
+            if (name && amount) {
+                const expenseList = document.getElementById("expense-list");
+                const expenseItem = document.createElement("div");
+                expenseItem.classList.add("expense-item");
+                expenseItem.innerHTML = `
+                    <span>${name}</span>
+                    <span>₹${amount}</span>
+                    <button class='delete-btn' onclick='deleteExpense(this, ${amount})'>Delete</button>
+                `;
+                expenseList.appendChild(expenseItem);
+                total += amount;
+                updateTotal();
+            } else {
+                alert("Please enter both fields");
+            }
+        }
+
+        function deleteExpense(element, amount) {
+            element.parentElement.remove();
+            total -= amount;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            document.getElementById("total-expense").innerText = `Total: ₹${total}`;
+        }
+
+        function logout() {
+            alert("Logging out...");
+            window.location.href = "index.html";
+        }
+
+        function generatePDF() {
+            const doc = new jsPDF();
+            doc.text("Expense Report", 20, 20);
+            document.querySelectorAll(".expense-item").forEach(item => {
+                doc.text(`${item.children[0].innerText}: ${item.children[1].innerText}`, 20, 30);
+            });
+            doc.text(`Total: ₹${total}`, 20, 50);
+            doc.save("expenses.pdf");
+        }
+
+        function exportToWord() {
+            let content = "Expense Report\n\n";
+            document.querySelectorAll(".expense-item").forEach(item => {
+                content += `${item.children[0].innerText}: ${item.children[1].innerText}\n`;
+            });
+            content += `\nTotal: ₹${total}`;
+            const blob = new Blob([content], { type: "application/msword" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "expenses.doc";
+            link.click();
+        }
+
+        function exportToExcel() {
+            let tableData = [["Expense Name", "Amount"]];
+            document.querySelectorAll(".expense-item").forEach(item => {
+                tableData.push([item.children[0].innerText, item.children[1].innerText.replace("₹", "")]);
+            });
+            tableData.push(["Total", total]);
+            const ws = XLSX.utils.aoa_to_sheet(tableData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+            XLSX.writeFile(wb, "expenses.xlsx");
+        }
+    </script>
+</body>
+
+</html>
